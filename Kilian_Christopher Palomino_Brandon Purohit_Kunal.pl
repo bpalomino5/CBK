@@ -44,7 +44,6 @@ Todo: How to handle a sentence like "what color is the car?" --> doesn't follow 
 since it allows a noun directly following a pronoun. In our language, perhaps allow for a verb phrase that starts with a noun phrase?
 */
 
-
 s --> np(subject), vp.
 s --> np(interrogative), vp.
 np(_) --> n.
@@ -131,11 +130,22 @@ processQuestion(ParsedSentence, Response) :- Response = 'That was a question!'. 
 
 /*
 Handle the dissection of statements
+Sample sentence breakdown handled here:
+First example here looks at arg 1 of the parsed sentence which is np(det(the), n(color), pp(prep(of), np(det(the), n(car)))), unifying with "NP"
+also gets the second argument for the parse sentence, which is vp(v(is), np(n(blue))), unifying this with VP
+then it looks at arg 2 of NP which is n(color), and "color" is unified with "Attribute"
+then looks at arg 3 of the noun phrase which is pp(prep(of), np(det(the), n(car))), unifying with PP
+then looks at arg 2 of PP which is np(det(the), n(car)), unifying with NNP (new noun phrase)
+then looks at arg 2 of NNP which is n(car), unifying "car" with "Object"
+then looks at arg 2 of VP which is np(n(blue)) and unifies with NNNP (new new noun phrase)
+finally looking at arg 1 of NNNP which is n(blue), unifying blue with "Specific"
+
 */
-processStatement(ParsedSentence, Response) :- Response = 'That was a statement.'.    % fill in with more statement processing 
+processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2, ParsedSentence, VP)  arg(2, NP,n(Attribute)), 
+																		arg(3, NP, PP), arg(2, PP, NNP), arg(2, NNP, n(Object)), 
+																		arg(2, VP, NNNP), arg(1, NNNP, n(Specific)), checkDB(Attribute, Object, Specific, Response).     % Response = 'That was a statement.'.    % fill in with more statement processing 
 
-
-
+checkDB(Attribute, Object, Specific, Response) :-
 
 
 
