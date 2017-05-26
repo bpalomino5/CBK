@@ -146,7 +146,7 @@ finally looking at arg 1 of NNNP which is n(blue), unifying blue with "Value"
 */
 processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2, ParsedSentence, VP),
                                                                        arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
-																	   arg(2, NNP, n(Object)), arg(2, VP, NNNP), arg(1, NNNP, n(Value)), checkDB(Attribute, Object, Value, Response).
+                                                                       arg(2, NNP, n(Object)), arg(2, VP, NNNP), arg(1, NNNP, n(Value)), checkDB(Attribute, Object, Value, Response).
 
 checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value), !, Response = 'I know.'. % need to use cut so that it doesn't attempt to do the next thing if the fact already exists!
 checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = 'OK.'.
