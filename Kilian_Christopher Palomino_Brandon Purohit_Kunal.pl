@@ -44,6 +44,10 @@ Todo: How to handle a sentence like "what color is the car?" --> doesn't follow 
 since it allows a noun directly following a pronoun. In our language, perhaps allow for a verb phrase that starts with a noun phrase?
 */
 
+
+:- dynamic fact/3. % declaration that there is a dynamic predicate named "fact" with an arity of 3
+
+
 s --> np(subject), vp.
 s --> np(interrogative), vp.
 np(_) --> n.
@@ -112,14 +116,14 @@ Idea being that execute will first run the passed sentence through the parser, a
 to another function which will in turn read the parsed sentence and pull out the relevant data.
 */
 execute([], R) :- R = 'You submitted a blank sentence!'.
-execute(List, Response) :- s(T, List, []), readParsed(T, Response).
+execute(List, Response) :- s(T, List, []), readParsed(T, Response), !.
 execute(_, R) :- R = 'I can\'t understand this sentence.'.
 
 /*
 The first argument of the sentence is the noun phrase. If the first argument to the noun phrase is the pronoun "what", it's a question and should be handled accordingly.
 If the sentence is not a question, it can be handled as a statement instead.
 */
-readParsed(ParsedSentence, Response) :- arg(1, ParsedSentence, X), arg(1, X, pro(what)), processQuestion(ParsedSentence, Response).
+readParsed(ParsedSentence, Response) :- arg(1, ParsedSentence, X), arg(1, X, pro(what)), !, processQuestion(ParsedSentence, Response).
 readParsed(ParsedSentence, Response) :- processStatement(ParsedSentence, Response).
 
 /*
@@ -138,17 +142,35 @@ then looks at arg 3 of the noun phrase which is pp(prep(of), np(det(the), n(car)
 then looks at arg 2 of PP which is np(det(the), n(car)), unifying with NNP (new noun phrase)
 then looks at arg 2 of NNP which is n(car), unifying "car" with "Object"
 then looks at arg 2 of VP which is np(n(blue)) and unifies with NNNP (new new noun phrase)
-finally looking at arg 1 of NNNP which is n(blue), unifying blue with "Specific"
-
+finally looking at arg 1 of NNNP which is n(blue), unifying blue with "Value"
 */
-processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2, ParsedSentence, VP)  arg(2, NP,n(Attribute)), 
-																		arg(3, NP, PP), arg(2, PP, NNP), arg(2, NNP, n(Object)), 
-																		arg(2, VP, NNNP), arg(1, NNNP, n(Specific)), checkDB(Attribute, Object, Specific, Response).     % Response = 'That was a statement.'.    % fill in with more statement processing 
+processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2, ParsedSentence, VP),
+                                                                       arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
+																	   arg(2, NNP, n(Object)), arg(2, VP, NNNP), arg(1, NNNP, n(Value)), checkDB(Attribute, Object, Value, Response).
 
-checkDB(Attribute, Object, Specific, Response) :-
+checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value), !, Response = 'I know.'. % need to use cut so that it doesn't attempt to do the next thing if the fact already exists!
+checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = 'OK.'.
+
+% Note that we still need an additional "checkDB" function which will handle cases where some of the knowledge is already in the DB, such as if fact(color, car, blue) already exists
+% and it processes the statement "The color of the car is green", it needs to handle this as per the project instructions
 
 
+/*
+05\26\17 update:
+Hey guys, I talked to the professor after class yesterday and got a good explanation of how we should handle the checking\adding of info to our DB. We can't use a variable
+as the functor because Prolog won't allow that, but we CAN create a predefined functor to store all of our data in.
+In other words, we can't use a statement like: Attribute(Object, Value)
+but we can say: fact(Attribute, Object, Value)
 
+Another option is to use the "functor" function defined in the slides to build these items on the fly. The professor said that wasn't necessary for this project,
+but after we've got this thing working I might go ahead and try that simply because it might be more flexible and might earn us some extra points!
+
+I've currently added our first data entry/check. If you run:
+?- execute([the, color, of, the, car, is, blue], X).
+it will add the fact to the DB and return "OK."
+Can test by first running: fact(color, car, blue). which will return "false" at first. Then run the above execute statement, and then the fact statement a second time.
+The second time it will return "true".
+*/
 
 
 
