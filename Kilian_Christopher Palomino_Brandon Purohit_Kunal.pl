@@ -48,8 +48,8 @@ since it allows a noun directly following a pronoun. In our language, perhaps al
 :- dynamic fact/3. % declaration that there is a dynamic predicate named "fact" with an arity of 3
 
 
-s --> np(subject), vp.
-s --> np(interrogative), vp.
+s --> np(subject); np(interrogative), vp.
+%% s --> np(interrogative), vp.
 np(_) --> n.
 np(_) --> det, n.
 np(_) --> det, n, pp.
@@ -90,8 +90,8 @@ ex 2: ?- s(T, [what, is, the, color, of, the, car], []).
 T = s(np(pro(what)), vp(v(is), np(det(the), n(color), pp(prep(of), np(det(the), n(car))))))
 */
 
-s(s(NP,VP)) --> np(subject,NP), vp(VP).
-s(s(NP,VP)) --> np(interrogative,NP), vp(VP).
+s(s(NP,VP)) --> np(subject,NP); np(interrogative,NP), vp(VP).
+%% s(s(NP,VP)) --> np(interrogative,NP), vp(VP).
 np(_,np(N)) --> n(N).      
 np(_,np(Det,N)) --> det(Det), n(N).
 np(_,np(Det,N,PP)) --> det(Det), n(N), pp(PP).           
@@ -130,9 +130,13 @@ readParsed(ParsedSentence, Response) :- processStatement(ParsedSentence, Respons
 /*
 Handle the dissection of questions
 */
-processQuestion(ParsedSentence, Response) :- Response = ParsedSentence. % 'That was a question!'.   % fill in with more question processing
+%% processQuestion(ParsedSentence, Response) :- Response = ParsedSentence. % 'That was a question!'.   % fill in with more question processing
+processQuestion(ParsedSentence, Response) :- arg(2, ParsedSentence, VP), arg(2, VP, NP), arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
+                                                                       arg(2, NNP, n(Object)), checkDBQuestion(Attribute,Object,Response).
+%% processQuestion(ParsedSentence, Response) :- Response = 'Not available'.
 
-
+checkDBQuestion(Attribute,Object,Response) :- fact(Attribute,Object,Value), !, Response = Value.
+checkDBQuestion(Attribute,Object,Response) :- Response = 'Not known'.
 /*
 Handle the dissection of statements
 Sample sentence breakdown handled here:
