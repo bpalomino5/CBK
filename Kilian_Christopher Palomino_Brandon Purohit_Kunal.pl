@@ -58,21 +58,28 @@ np(X) --> pro(X).
 pp --> prep, np(subject).  % note that "subject" is a placeholder here for now
 vp --> v, np(object).
 vp --> v.
-det --> [the].
-det --> [one].
-n --> [car].
-n --> [bottle].
-n --> [color].
-n --> [capacity].
-n --> [blue].
-n --> [liter].
-v --> [is].
-pro(subject) --> [he].
-pro(subject) --> [she].
-pro(object) --> [him].
-pro(object) --> [her].
-pro(interrogative) --> [what].
+det --> [Word], {lex(Word, det)}.
+n --> [Word], {lex(Word, n)}.
+v --> [Word], {lex(Word, v)}.
+pro(subject) --> [Word], {lex(Word, pro(subject))}.
+pro(object) --> [Word], {lex(Word, pro(object))}.
+pro(interrogative) --> [Word], {lex(Word, pro(interrogative))}.
 prep --> [of].
+
+lex(the, det).
+lex(one, det).
+lex(car, n).
+lex(bottle, n).
+lex(color, n).
+lex(capacity, n).
+lex(blue, n).
+lex(liter, n).
+lex(is, v).
+lex(he, pro(subject)).
+lex(she, pro(subject)).
+lex(him, pro(object)).
+lex(her, pro(object)).
+lex(what, pro(interrogative)).
 
 /*
 Edited parser to match updated DCG
@@ -87,26 +94,20 @@ s(s(NP,VP)) --> np(subject,NP), vp(VP).
 s(s(NP,VP)) --> np(interrogative,NP), vp(VP).
 np(_,np(N)) --> n(N).      
 np(_,np(Det,N)) --> det(Det), n(N).
-np(_,np(Det,N,PP)) --> det(Det), n(N), pp(PP).                  
+np(_,np(Det,N,PP)) --> det(Det), n(N), pp(PP).           
 np(X,np(Det,Pro)) --> det(Det), pro(X,Pro).
-np(X,np(Pro)) --> pro(X,Pro).
+np(X,np(Pro)) --> pro(X,Pro).       
 pp(pp(PREP,NP)) --> prep(PREP), np(subject,NP). %note that "subject" here is placeholder --> need to figure out proper np type for prep phrases
 vp(vp(V,NP)) --> v(V), np(object,NP).
 vp(vp(V)) --> v(V).
-det(det(the)) --> [the]. 
-det(det(one)) --> [one].              
-n(n(car)) --> [car].       
-n(n(bottle)) --> [bottle].
-n(n(color)) --> [color].
-n(n(capacity)) --> [capacity].
-n(n(blue)) --> [blue].
-n(n(liter)) --> [liter].
-v(v(is)) --> [is].
+det(det(Word)) --> [Word].
+n(n(Word)) --> [Word].
+v(v(Word)) --> [Word].
 pro(subject,pro(he)) --> [he].
 pro(subject,pro(she)) --> [she].
 pro(object,pro(him)) --> [him].
 pro(object,pro(her)) --> [her].
-pro(interrogative,pro(what)) --> [what].
+pro(interrogative,pro(Word)) --> [Word].
 prep(prep(of)) --> [of].
 
 
@@ -129,7 +130,7 @@ readParsed(ParsedSentence, Response) :- processStatement(ParsedSentence, Respons
 /*
 Handle the dissection of questions
 */
-processQuestion(ParsedSentence, Response) :- Response = 'That was a question!'.   % fill in with more question processing
+processQuestion(ParsedSentence, Response) :- Response = ParsedSentence. % 'That was a question!'.   % fill in with more question processing
 
 
 /*
