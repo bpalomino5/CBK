@@ -48,38 +48,6 @@ since it allows a noun directly following a pronoun. In our language, perhaps al
 :- dynamic fact/3. % declaration that there is a dynamic predicate named "fact" with an arity of 3
 
 
-s --> np(subject); np(interrogative), vp.
-%% s --> np(interrogative), vp.
-np(_) --> n.
-np(_) --> det, n.
-np(_) --> det, n, pp.
-np(X) --> det, pro(X).
-np(X) --> pro(X).
-pp --> prep, np(subject).  % note that "subject" is a placeholder here for now
-vp --> v, np(object).
-vp --> v.
-det --> [Word], {lex(Word, det)}.
-n --> [Word], {lex(Word, n)}.
-v --> [Word], {lex(Word, v)}.
-pro(subject) --> [Word], {lex(Word, pro(subject))}.
-pro(object) --> [Word], {lex(Word, pro(object))}.
-pro(interrogative) --> [Word], {lex(Word, pro(interrogative))}.
-prep --> [of].
-
-lex(the, det).
-lex(one, det).
-lex(car, n).
-lex(bottle, n).
-lex(color, n).
-lex(capacity, n).
-lex(blue, n).
-lex(liter, n).
-lex(is, v).
-lex(he, pro(subject)).
-lex(she, pro(subject)).
-lex(him, pro(object)).
-lex(her, pro(object)).
-lex(what, pro(interrogative)).
 
 /*
 Edited parser to match updated DCG
@@ -90,25 +58,46 @@ ex 2: ?- s(T, [what, is, the, color, of, the, car], []).
 T = s(np(pro(what)), vp(v(is), np(det(the), n(color), pp(prep(of), np(det(the), n(car))))))
 */
 
-s(s(NP,VP)) --> np(subject,NP); np(interrogative,NP), vp(VP).
-%% s(s(NP,VP)) --> np(interrogative,NP), vp(VP).
+% DCG/Parse Tree found here:
+
+s(s(NP, VP)) --> np(subject,NP); np(interrogative,NP), vp(VP).
+% s(s(NP, VP)) --> np(interrogative,NP), vp(VP).
 np(_,np(N)) --> n(N).      
-np(_,np(Det,N)) --> det(Det), n(N).
-np(_,np(Det,N,PP)) --> det(Det), n(N), pp(PP).           
-np(X,np(Det,Pro)) --> det(Det), pro(X,Pro).
+np(_,np(Det, N)) --> det(Det), n(N).
+np(_,np(Adj, N)) --> adj(Adj), n(N).
+np(_,np(Det, Adj, N)) --> det(Det), adj(Adj), n(N).
+np(_,np(Adj, N, PP)) --> adj(Adj), n(N), pp(PP).
+np(_,np(Det, Adj, N, PP)) --> det(Det), adj(Adj), n(N), pp(PP).
+np(_,np(Det, N, PP)) --> det(Det), n(N), pp(PP).           
+np(X,np(Det, Pro)) --> det(Det), pro(X, Pro).
 np(X,np(Pro)) --> pro(X,Pro).       
-pp(pp(PREP,NP)) --> prep(PREP), np(subject,NP). %note that "subject" here is placeholder --> need to figure out proper np type for prep phrases
-vp(vp(V,NP)) --> v(V), np(object,NP).
+pp(pp(PREP, NP)) --> prep(PREP), np(subject, NP). %note that "subject" here is placeholder --> need to figure out proper np type for prep phrases
+vp(vp(V, NP)) --> v(V), np(object, NP).
 vp(vp(V)) --> v(V).
-det(det(Word)) --> [Word].
-n(n(Word)) --> [Word].
-v(v(Word)) --> [Word].
+det(det(Word)) --> [Word], {lex(Word, det)}.
+n(n(Word)) --> [Word], {lex(Word, n)}.
+v(v(Word)) --> [Word], {lex(Word, v)}.
+adj(adj(Word)) --> [Word], {lex(Word, adj)}.
 pro(subject,pro(he)) --> [he].
 pro(subject,pro(she)) --> [she].
 pro(object,pro(him)) --> [him].
 pro(object,pro(her)) --> [her].
-pro(interrogative,pro(Word)) --> [Word].
+pro(interrogative,pro(Word)) --> [Word], {lex(Word, pro(interrogative))}.
 prep(prep(of)) --> [of].
+
+
+% Lexicon defitions found here:
+
+lex(the, X) :- !, X = det.
+lex(one, X) :- !, X = det.
+lex(is, X) :- !, X = v.
+lex(he, pro(subject)).
+lex(she, pro(subject)).
+lex(him, pro(object)).
+lex(her, pro(object)).
+lex(what, X) :- !, X = pro(interrogative).
+lex(X, n).
+lex(X, adj).
 
 
 /*
