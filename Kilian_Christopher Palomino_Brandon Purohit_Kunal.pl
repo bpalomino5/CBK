@@ -130,6 +130,8 @@ checkDBQuestion(Attribute,Object,Response) :- printMessage(Attribute,Object,'unk
 
 % printMessage predicate
 % Added to help clean up printing to user
+% Concatenates Attribute, Object, and Value to a single line string, and unifies that string to Response
+% Used in checkDBQuestion and checkDB
 printMessage(Attribute, Object, Value, Response) :- term_string(Attribute, Att), term_string(Object, Obj), term_string(Value, Val), string_concat("The ",Att, P1), string_concat(P1, " of the ", P2), string_concat(P2, Obj, P3), string_concat(P3, " is ", P4), string_concat(P4, Val, P5), Response = P5.
 
 /*
@@ -146,7 +148,15 @@ finally looking at arg 1 of NNNP which is n(blue), unifying blue with "Value"
 */
 processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2, ParsedSentence, VP),
                                                                        arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
-                                                                       arg(2, NNP, n(Object)), arg(2, VP, NNNP), arg(1, NNNP, n(Value)), checkDB(Attribute, Object, Value, Response).
+                                                                       arg(2, NNP, n(Object)), arg(2, VP, NNNP), getValue(NNNP,Value) , checkDB(Attribute, Object, Value, Response).
+
+% getValue predicate
+% Handles getting single or multi-word properties from the term NP, which is the term inside VP of the parsed tree.
+% Concatenates the property values together and unifies to term Value.
+% Used in processStatement
+getValue(NP, Value) :- functor(NP,_,A), A=:=1, !, arg(1, NP, n(Value)).
+getValue(NP, Value) :- functor(NP,_,A), A=:=2, arg(1, NP, det(D)), !, arg(2, NP, n(N)), term_string(D, V1), term_string(N, V2), string_concat(V1, " ", P1), string_concat(P1, V2, Value).
+getValue(NP, Value) :- functor(NP,_,A), A=:=2, arg(1, NP, adj(Adj)), !, arg(2, NP, n(N)), term_string(Adj, V1), term_string(N, V2), string_concat(V1, " ", P1), string_concat(P1, V2, Value).
 
 checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value),!, Response = 'I know.'.
 checkDB(Attribute, Object, _, Response) :- fact(Attribute, Object, X),!, printMessage(Attribute,Object,X,Response).
