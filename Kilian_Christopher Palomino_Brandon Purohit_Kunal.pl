@@ -153,8 +153,10 @@ processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2,
                                                                        arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
                                                                        arg(2, NNP, n(Object)), arg(2, VP, NNNP), arg(1, NNNP, n(Value)), checkDB(Attribute, Object, Value, Response).
 
-checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value), !, Response = 'I know.'. % need to use cut so that it doesn't attempt to do the next thing if the fact already exists!
+checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value),!, Response = 'I know.'.
+checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, X),!,Response = 'The '+Attribute+ ' of the '+ Object + ' is '+X .                .
 checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = 'OK.'.
+
 
 % Note that we still need an additional "checkDB" function which will handle cases where some of the knowledge is already in the DB, such as if fact(color, car, blue) already exists
 % and it processes the statement "The color of the car is green", it needs to handle this as per the project instructions
