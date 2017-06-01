@@ -97,8 +97,8 @@ lex(she, pro(subject)).
 lex(him, pro(object)).
 lex(her, pro(object)).
 lex(what, X) :- !, X = pro(interrogative).
-lex(X, n).
-lex(X, adj).
+lex(_, n).
+lex(_, adj).
 
 
 /*
@@ -126,7 +126,12 @@ processQuestion(ParsedSentence, Response) :- arg(2, ParsedSentence, VP), arg(2, 
 %% processQuestion(ParsedSentence, Response) :- Response = 'Not available'.
 
 checkDBQuestion(Attribute,Object,Response) :- fact(Attribute,Object,Value), !, Response = Value.
-checkDBQuestion(Attribute,Object,Response) :- Response = 'Not known'.
+checkDBQuestion(Attribute,Object,Response) :- printMessage(Attribute,Object,'unknown', Response).
+
+% printMessage predicate
+% Added to help clean up printing to user
+printMessage(Attribute, Object, Value, Response) :- term_string(Attribute, Att), term_string(Object, Obj), term_string(Value, Val), string_concat("The ",Att, P1), string_concat(P1, " of the ", P2), string_concat(P2, Obj, P3), string_concat(P3, " is ", P4), string_concat(P4, Val, P5), Response = P5.
+
 /*
 Handle the dissection of statements
 Sample sentence breakdown handled here:
@@ -144,13 +149,11 @@ processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2,
                                                                        arg(2, NNP, n(Object)), arg(2, VP, NNNP), arg(1, NNNP, n(Value)), checkDB(Attribute, Object, Value, Response).
 
 checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value),!, Response = 'I know.'.
-checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, X),!,Response = 'The '+Attribute+ ' of the '+ Object + ' is '+X .                .
+checkDB(Attribute, Object, _, Response) :- fact(Attribute, Object, X),!, printMessage(Attribute,Object,X,Response).
 checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = 'OK.'.
-
 
 % Note that we still need an additional "checkDB" function which will handle cases where some of the knowledge is already in the DB, such as if fact(color, car, blue) already exists
 % and it processes the statement "The color of the car is green", it needs to handle this as per the project instructions
-
 
 /*
 05\26\17 update:
