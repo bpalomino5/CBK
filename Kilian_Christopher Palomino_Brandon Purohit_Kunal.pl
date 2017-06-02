@@ -94,7 +94,7 @@ lex(one, X) :- !, X = det.
 lex(a, X) :- !, X = det.
 lex(an, X) :- !, X = det.
 lex(is, X) :- !, X = v.
-lex(he, X) :- !, X = pro(subject)..
+lex(he, X) :- !, X = pro(subject).
 lex(she, X) :- !, X = pro(subject).
 lex(him, X) :- !, X = pro(object).
 lex(her, X) :- !, X = pro(object).
@@ -126,7 +126,7 @@ processQuestion(ParsedSentence, Response) :- arg(2, ParsedSentence, VP), arg(2, 
                                                                        arg(2, NNP, n(Object)), checkDBQuestion(Attribute,Object,Response).
 																	   
 
-checkDBQuestion(Attribute,Object,Response) :- fact(Attribute,Object,Value), !, term_string(Value, Val), string_concat("It\'s ", Val, Response).
+checkDBQuestion(Attribute,Object,Response) :- fact(Attribute,Object,Value), !, string_concat("It\'s ", Value, Response).
 checkDBQuestion(_,_,Response) :- Response = "I don\'t know".   % printMessage(Attribute,Object,'unknown', Response). MODIFIED
 
 % printMessage predicate
@@ -166,9 +166,6 @@ checkDB(Attribute, Object, _, Response) :- fact(Attribute, Object, X), !, printM
 checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = "OK".
 
 
-
-% Note that we still need an additional "checkDB" function which will handle cases where some of the knowledge is already in the DB, such as if fact(color, car, blue) already exists
-% and it processes the statement "The color of the car is green", it needs to handle this as per the project instructions
 
 /*
 05\26\17 update:
