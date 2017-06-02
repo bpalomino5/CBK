@@ -62,7 +62,6 @@ T = s(np(pro(what)), vp(v(is), np(det(the), n(color), pp(prep(of), np(det(the), 
 % DCG/Parse Tree found here:
 
 s(s(NP, VP)) --> np(subject,NP); np(interrogative,NP), vp(VP).
-% s(s(NP, VP)) --> np(interrogative,NP), vp(VP).
 np(_,np(N)) --> n(N).      
 np(_,np(Det, N)) --> det(Det), n(N).
 np(_,np(Adj, N)) --> adj(Adj), n(N).
