@@ -79,11 +79,11 @@ det(det(Word)) --> [Word], {lex(Word, det)}.
 n(n(Word)) --> [Word], {lex(Word, n)}.
 v(v(Word)) --> [Word], {lex(Word, v)}.
 adj(adj(Word)) --> [Word], {lex(Word, adj)}.
-pro(subject,pro(he)) --> [he].
-pro(subject,pro(she)) --> [she].
-pro(object,pro(him)) --> [him].
-pro(object,pro(her)) --> [her].
-pro(interrogative,pro(Word)) --> [Word], {lex(Word, pro(interrogative))}.
+pro(subject, pro(he)) --> [he].
+pro(subject, pro(she)) --> [she].
+pro(object, pro(him)) --> [him].
+pro(object, pro(her)) --> [her].
+pro(interrogative, pro(Word)) --> [Word], {lex(Word, pro(interrogative))}.
 prep(prep(of)) --> [of].
 
 
@@ -91,11 +91,13 @@ prep(prep(of)) --> [of].
 
 lex(the, X) :- !, X = det.
 lex(one, X) :- !, X = det.
+lex(a, X) :- !, X = det.
+lex(an, X) :- !, X = det.
 lex(is, X) :- !, X = v.
-lex(he, pro(subject)).
-lex(she, pro(subject)).
-lex(him, pro(object)).
-lex(her, pro(object)).
+lex(he, X) :- !, X = pro(subject)..
+lex(she, X) :- !, X = pro(subject).
+lex(him, X) :- !, X = pro(object).
+lex(her, X) :- !, X = pro(object).
 lex(what, X) :- !, X = pro(interrogative).
 lex(_, n).
 lex(_, adj).
@@ -106,9 +108,9 @@ First attempt at "execute" function
 Idea being that execute will first run the passed sentence through the parser, and then will send the parsed sentence
 to another function which will in turn read the parsed sentence and pull out the relevant data.
 */
-execute([], R) :- R = 'You submitted a blank sentence!'.
+execute([], R) :- !, R = "You submitted a blank sentence!".
 execute(List, Response) :- s(T, List, []), readParsed(T, Response), !.
-execute(_, R) :- R = 'I can\'t understand this sentence.'.
+execute(_, R) :- R = "I can\'t understand this sentence".
 
 /*
 The first argument of the sentence is the noun phrase. If the first argument to the noun phrase is the pronoun "what", it's a question and should be handled accordingly.
@@ -120,19 +122,20 @@ readParsed(ParsedSentence, Response) :- processStatement(ParsedSentence, Respons
 /*
 Handle the dissection of questions
 */
-%% processQuestion(ParsedSentence, Response) :- Response = ParsedSentence. % 'That was a question!'.   % fill in with more question processing
 processQuestion(ParsedSentence, Response) :- arg(2, ParsedSentence, VP), arg(2, VP, NP), arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
                                                                        arg(2, NNP, n(Object)), checkDBQuestion(Attribute,Object,Response).
-%% processQuestion(ParsedSentence, Response) :- Response = 'Not available'.
+																	   
 
-checkDBQuestion(Attribute,Object,Response) :- fact(Attribute,Object,Value), !, Response = Value.
-checkDBQuestion(Attribute,Object,Response) :- printMessage(Attribute,Object,'unknown', Response).
+checkDBQuestion(Attribute,Object,Response) :- fact(Attribute,Object,Value), !, term_string(Value, Val), string_concat("It\'s ", Val, Response).
+checkDBQuestion(_,_,Response) :- Response = "I don\'t know".   % printMessage(Attribute,Object,'unknown', Response). MODIFIED
 
 % printMessage predicate
 % Added to help clean up printing to user
 % Concatenates Attribute, Object, and Value to a single line string, and unifies that string to Response
 % Used in checkDBQuestion and checkDB
-printMessage(Attribute, Object, Value, Response) :- term_string(Attribute, Att), term_string(Object, Obj), term_string(Value, Val), string_concat("The ",Att, P1), string_concat(P1, " of the ", P2), string_concat(P2, Obj, P3), string_concat(P3, " is ", P4), string_concat(P4, Val, P5), Response = P5.
+printMessage(Attribute, Object, Value, Response) :- term_string(Attribute, Att), term_string(Object, Obj), string_concat("The ",Att, P1), string_concat(P1, " of the ", P2), string_concat(P2, Obj, P3), string_concat(P3, " is ", P4), string_concat(P4, Value, Response).
+
+%ASK PROFESSOR - Is this sentence return val OK, or does it need to exactly match the assignment outline?
 
 /*
 Handle the dissection of statements
@@ -148,19 +151,21 @@ finally looking at arg 1 of NNNP which is n(blue), unifying blue with "Value"
 */
 processStatement(ParsedSentence, Response) :- arg(1, ParsedSentence, NP), arg(2, ParsedSentence, VP),
                                                                        arg(2, NP, n(Attribute)), arg(3, NP, PP), arg(2, PP, NNP), 
-                                                                       arg(2, NNP, n(Object)), arg(2, VP, NNNP), getValue(NNNP,Value) , checkDB(Attribute, Object, Value, Response).
+                                                                       arg(2, NNP, n(Object)), arg(2, VP, NNNP), getValue(NNNP, Value), checkDB(Attribute, Object, Value, Response).
 
 % getValue predicate
 % Handles getting single or multi-word properties from the term NP, which is the term inside VP of the parsed tree.
 % Concatenates the property values together and unifies to term Value.
 % Used in processStatement
-getValue(NP, Value) :- functor(NP,_,A), A=:=1, !, arg(1, NP, n(Value)).
+getValue(NP, Value) :- functor(NP,_,A), A=:=1, !, arg(1, NP, n(N)), term_string(N, Value). %modified to change value to a string in advance
 getValue(NP, Value) :- functor(NP,_,A), A=:=2, arg(1, NP, det(D)), !, arg(2, NP, n(N)), term_string(D, V1), term_string(N, V2), string_concat(V1, " ", P1), string_concat(P1, V2, Value).
 getValue(NP, Value) :- functor(NP,_,A), A=:=2, arg(1, NP, adj(Adj)), !, arg(2, NP, n(N)), term_string(Adj, V1), term_string(N, V2), string_concat(V1, " ", P1), string_concat(P1, V2, Value).
 
-checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value),!, Response = 'I know.'.
-checkDB(Attribute, Object, _, Response) :- fact(Attribute, Object, X),!, printMessage(Attribute,Object,X,Response).
-checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = 'OK.'.
+checkDB(Attribute, Object, Value, Response) :- fact(Attribute, Object, Value), !, Response = "I know".
+checkDB(Attribute, Object, _, Response) :- fact(Attribute, Object, X), !, printMessage(Attribute, Object, X, Response).
+checkDB(Attribute, Object, Value, Response) :- assert(fact(Attribute, Object, Value)), !, Response = "OK".
+
+
 
 % Note that we still need an additional "checkDB" function which will handle cases where some of the knowledge is already in the DB, such as if fact(color, car, blue) already exists
 % and it processes the statement "The color of the car is green", it needs to handle this as per the project instructions
