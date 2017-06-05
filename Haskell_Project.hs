@@ -1,4 +1,4 @@
-import Parser
+﻿import Parser
 import Data.List
 
 {- 
@@ -264,68 +264,73 @@ they parse.
 
 
 --FIRST ATTEMPT AT PARSE RULES
---Note that I've been getting a strange error when I try to compile this, not sure why. It reads:
---Haskell_Project.hs:271:16: error:
---    Parse error in pattern: symbol
---    Possibly caused by a missing 'do'?
--- Needs fixing!!
+
 
 tExp :: Parser TExpTree
 tExp = do opd <- tOpd
-              (do symbol "<=>"
-                    exp <- tExp
-                    return (E opd exp) -- opd <=> exp
-               +++ (do symbol "==>"
-                             otherExp <- tExp
-                             return (I opd otherExp) -- opd ==> otherExp
-                        +++ return opd))
+          (do symbol "<=>"
+              exp <- tExp
+              return (E opd exp) -- opd <=> exp
+           +++ (do symbol "==>"
+                   otherExp <- tExp
+                   return (I opd otherExp) -- opd ==> otherExp
+                +++ return opd))
 
-						 
+
 tOpd :: Parser TExpTree
 tOpd = do term <- tTerm
-                (do symbol "|||"
-                      opd <- tOpd
-                      return (O term opd)
-                 +++ return term)
+          (do symbol "|||"
+              opd <- tOpd
+              return (O term opd)
+           +++ return term)
 
 
 tTerm :: Parser TExpTree
 tTerm = do fact <- tFact
-                  (do symbol "&&&"
-                        term <- tTerm
-						return (A fact term)
-                   +++ return fact)
+           (do symbol "&&&"
+               term <- tTerm
+               return (A fact term)
+            +++ return fact)
 
 
 tFact :: Parser TExpTree
 tFact = do symbol "~"
-                prim <- tPrim
-                return (N prim)
-           +++ (do otherPrim <- tPrim
-                         return otherPrim)
+           prim <- tPrim
+           return (N prim)
+        +++ (do otherPrim <- tPrim
+                return otherPrim)
 
 
 tPrim :: Parser TExpTree
 tPrim = do symbol "("
-                 exp <- tExp
-                 symbol ")"
-                 return exp
-            +++ (do var <- tVar
-                          return var
-                     +++ (do lit <- tLit
-                                   return lit))
+           exp <- tExp
+           symbol ")"
+           return exp
+        +++ (do var <- tVar
+                return var
+             +++ (do lit <- tLit
+                     return lit))
 
 
 tVar :: Parser TExpTree
 tVar = do theVar <- identifier
-               return theVar
+          return (V theVar)
 
 
 tLit :: Parser TExpTree
-tLit = do literal <- letter
-             if (literal == T || literal == F || literal == M)
-                  then return literal
-                  else return Nothing
+tLit = do literal <- token (letter)
+          if (literal == 'T')
+             then return (L T)
+             else if (literal == 'F')
+                then return (L F)
+                else if (literal == 'M')
+                   then return (L M)
+                   else return (L F) --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
+          --if (literal == T || literal == F || literal == M)
+             --then return (L literal)
+             --else return ()
+
+
 
 -- TODO: Implement a function parseT that takes a string as input 
 -- and returns a ternary logic expression tree (TExpTree)
@@ -337,7 +342,7 @@ tLit = do literal <- letter
 -- This completes part 3. You can use the following functions to test your implementation
 
 --commenting out "test" code temporarily so that errors in unfinished code aren't thrown
-{-
+
 testtLit :: Bool
 testtLit = lt == (L T) && lf == (L F) && lm == (L M)  
            where Just (lt, _) = parse tLit " T " 
@@ -425,7 +430,7 @@ testtExp = lt == (L T) && lf == (L F) && lm == (L M) && pv == (V "id2")  && pe =
 
 testPart3 :: Bool
 testPart3 = testtLit && testtVar && testtPrim && testtFact && testtTerm && testtOpd && testtExp
--}
+
 
 -- P A R T 4: Tautology Prover
 {- An expression is a tautology if it evaluates to T (True) regardless of the value assigned to
