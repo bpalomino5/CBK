@@ -244,7 +244,7 @@ tExp :: tOpd ( '<=>' tExp | '==>' tExp| e )  -- The equivalence operator has the
 tOpd :: tTerm ( '|||' tOpd | e )                    -- The Or operator is just above equivalence in precedence
 tTerm :: tFact ( '&&&' tTerm | e)                 -- The And operator is just above Or in precedence
 tFact :: '~' tPrim | tPrim                             -- not operator precedence not mentioned above, apparently higher than these others
-primary :: tVar | tLit | '('tExp')'
+tPrim :: tVar | tLit | '('tExp')'
 tVar :: lowercase (Alphanumeric)*
 tLit :: T | F | M
 
@@ -335,9 +335,20 @@ tLit = do literal <- token (letter)
 -- TODO: Implement a function parseT that takes a string as input 
 -- and returns a ternary logic expression tree (TExpTree)
 
+parseT :: String -> TExpTree
+parseT xs = case parse tExp xs of
+               Just (parsed, []) -> parsed
+               Just (parsed, remainder) -> error (show parsed ++ " and remaining input " ++ remainder)
+               Nothing -> error ("Invalid expression")
 
-
-
+{-
+Sample input/output for parseT:
+*Main> parseT "(T ||| F) &&& (M ==> F)"
+A (O (L T) (L F)) (I (L M) (L F))
+*Main> parseT "((T ||| F) &&& (M ==> F)) <=> ((T &&& M) ||| (F ||| M))"
+E (A (O (L T) (L F)) (I (L M) (L F))) (O (A (L T) (L M)) (O (L F) (L M)))
+*Main> 
+-}
 
 -- This completes part 3. You can use the following functions to test your implementation
 
