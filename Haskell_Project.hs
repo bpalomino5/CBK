@@ -325,7 +325,7 @@ tLit = do literal <- token (letter)
                 then return (L F)
                 else if (literal == 'M')
                    then return (L M)
-                   else return (L F) --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
+                   else error ("An invalid literal was encountered") --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
           --if (literal == T || literal == F || literal == M)
              --then return (L literal)
              --else return ()
