@@ -319,16 +319,16 @@ tVar = do theVar <- identifier
 
 tLit :: Parser TExpTree
 tLit = do literal <- token (letter)
-          if (literal == 'T')
-             then return (L T)
-             else if (literal == 'F')
-                then return (L F)
-                else if (literal == 'M')
-                   then return (L M)
-                   else error ("An invalid literal was encountered") --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
-          --if (literal == T || literal == F || literal == M)
-             --then return (L literal)
-             --else return ()
+          -- if (literal == 'T')
+          --    then return (L T)
+          --    else if (literal == 'F')
+          --       then return (L F)
+          --       else if (literal == 'M')
+          --          then return (L M)
+          --          else error ("An invalid literal was encountered") --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
+          if (literal == 'T' || literal == 'F' || literal == 'M')
+             then return (L (lk [("T", T), ("F", F), ("M", M)] [literal]))
+             else error ("An invalid literal")
 
 
 
