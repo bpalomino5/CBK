@@ -454,12 +454,14 @@ TODO: Create a function varList that takes as input a ternary logic expression t
 and returns a list of all the variable names (strings) contained in the tree.
 -}
  
- 
- 
- 
- 
- 
- 
+varList :: TExpTree -> [String]
+varList (L x) = []
+varList (V s) = [s]
+varList (N x) = varList x
+varList (A l r) = (varList l) ++ (varList r)
+varList (O l r) = (varList l) ++ (varList r)
+varList (E l r) = (varList l) ++ (varList r)
+varList (I l r) = (varList l) ++ (varList r)
  
 {- Next we need to generate a dictionary for all the possible combinations of values
 that can be assigned to the variables.
@@ -473,11 +475,18 @@ values of the second variable, and so forth.
 -}
 
 --Use list comprehension here, relating variables in the manner described above
+dictList :: [String] -> [Dict]
+dictList [] = [[]]
+dictList (xs:xss) = (dictList xss)++[[(x,y) | x <- [xs], y <- [T,F,M] ]]
 
-
-
-
-
+-- 1 var = 3 dicts
+--[[("vT", T)], [("vT", F)], [("vT",M)]]
+--2 var = 9 dicts
+{-
+[[("vT",T),("vF",T)],[("vT",F),("vF",T)],[("vT",M),("vF",T)]
+,[("vT",T),("vF",F)],[("vT",F),("vF",F)],[("vT",M),("vF",F)]
+,[("vT",T),("vF",M)],[("vT",F),("vF",M)],[("vT",M),("vF",M)]]
+-}
 
 {- 
 Now we can evaluate a ternary logic expression against all possible 
@@ -512,11 +521,11 @@ to test your work
 -}
 
 --commenting out "test" code temporarily so that errors in unfinished code aren't thrown
-{-
+
 testVarList :: Bool
 testVarList = varList (O (V "vT") (O (N (V "vM")) (E (V "vF") (L M)))) == ["vT", "vM", "vF"]
             && varList (O (L T) (O (N (L F)) (E (L M) (L M)))) == []
-
+{-
 sortedDictList :: Ord a => [[a]] -> [[a]]
 sortedDictList xss = sort [sort d | d <- xss]
 
