@@ -454,6 +454,7 @@ TODO: Create a function varList that takes as input a ternary logic expression t
 and returns a list of all the variable names (strings) contained in the tree.
 -}
  
+ 
 varList :: TExpTree -> [String]
 varList (L x) = []
 varList (V s) = [s]
@@ -462,6 +463,8 @@ varList (A l r) = (varList l) ++ (varList r)
 varList (O l r) = (varList l) ++ (varList r)
 varList (E l r) = (varList l) ++ (varList r)
 varList (I l r) = (varList l) ++ (varList r)
+ 
+ 
  
 {- Next we need to generate a dictionary for all the possible combinations of values
 that can be assigned to the variables.
@@ -474,20 +477,13 @@ one for each of the 3 literal values in ternary logic. For 2 variables there wil
 values of the second variable, and so forth.
 -}
 
---Use list comprehension here, relating variables in the manner described above
--- dictList :: [String] -> [Dict]
 
 
+dictList :: [String] -> [Dict]
 dictList [] = [[]]
 dictList (x:xs) = [((x,y):z) | z <- (dictList xs), y <- [T, F, M]]
 
 
-
-{-
-[[("vT",T),("vF",T)],[("vT",F),("vF",T)],[("vT",M),("vF",T)]
-,[("vT",T),("vF",F)],[("vT",F),("vF",F)],[("vT",M),("vF",F)]
-,[("vT",T),("vF",M)],[("vT",F),("vF",M)],[("vT",M),("vF",M)]]
--}
 
 {- 
 Now we can evaluate a ternary logic expression against all possible 
@@ -529,10 +525,10 @@ testVarList = varList (O (V "vT") (O (N (V "vM")) (E (V "vF") (L M)))) == ["vT",
 
 sortedDictList :: Ord a => [[a]] -> [[a]]
 sortedDictList xss = sort [sort d | d <- xss]
-{-
+
 testDictList :: Bool
-testDictList = dictList [] == [[]] 
-                && sortedDictList (dictList ["vT", "vM", "vF"])
+testDictList = dictList [] == [[]]
+              && sortedDictList (dictList ["vT", "vM", "vF"])
               == sortedDictList 
                  [[("vT",T),("vM",T),("vF",T)],[("vT",F),("vM",T),("vF",T)],[("vT",M),("vM",T),("vF",T)]
                  ,[("vT",T),("vM",F),("vF",T)],[("vT",F),("vM",F),("vF",T)],[("vT",M),("vM",F),("vF",T)]
@@ -544,7 +540,7 @@ testDictList = dictList [] == [[]]
                  ,[("vT",T),("vM",F),("vF",M)],[("vT",F),("vM",F),("vF",M)],[("vT",M),("vM",F),("vF",M)]
                  ,[("vT",T),("vM",M),("vF",M)],[("vT",F),("vM",M),("vF",M)],[("vT",M),("vM",M),("vF",M)]]
 
-
+{-
 testTautology :: Bool
 testTautology = isTautology "v ||| ~v ||| (v <=> M)"
               && not (isTautology "v ||| ~v ")
