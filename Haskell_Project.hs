@@ -477,10 +477,20 @@ values of the second variable, and so forth.
 --Use list comprehension here, relating variables in the manner described above
 -- dictList :: [String] -> [Dict]
 dictList [] = []
-dictList (xs:xss) =  [ a | a<-[(x,y) | x<-[xs], y <- [T,F,M]] ++ dictList xss ]
+
+-- [ (x,y) | x <- [T,F,M], y<- [T,F,M]]
+-- this creates: [(T,T),(T,F),(T,M),(F,T),(F,F),(F,M),(M,T),(M,F),(M,M)]
+-- which is all the 9 combinations needed for 2 vars
+-- using a z generator will give the 27 combinations for 3
+-- [ (x,y,z) | x <- [T,F,M], y<- [T,F,M], z<- [T,F,M] ]
+-- NEED to recreate this functionality using recursion
+-- uses a generator at each rec. level, use list comp, to pair them 
+-- adding the string vars to pairs after this should be much simpler
+-- [(T,T)] -> [("vT",T),("vF",T)] ...
+
+dictList (xs:xss) =  [x | x <- [T,F,M]]  ++dictList xss
 
 -- 1 var = 3 dicts)]]
-
 --[[("vT", T)], [("vT", F)], [("vT",M)]
 --2 var = 9 dicts
 {-
