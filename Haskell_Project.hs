@@ -328,7 +328,7 @@ tLit = do literal <- token (letter)
           --          else error ("An invalid literal was encountered") --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
           if (literal == 'T' || literal == 'F' || literal == 'M')
              then return (L (lk [("T", T), ("F", F), ("M", M)] [literal]))
-             else error ("An invalid literal")
+             else error ("An invalid literal was encountered")
 
 
 
@@ -476,46 +476,13 @@ values of the second variable, and so forth.
 
 --Use list comprehension here, relating variables in the manner described above
 -- dictList :: [String] -> [Dict]
-dictList [] = []
-
--- [ (x,y) | x <- [T,F,M], y<- [T,F,M]]
--- this creates: [(T,T),(T,F),(T,M),(F,T),(F,F),(F,M),(M,T),(M,F),(M,M)]
--- which is all the 9 combinations needed for 2 vars
--- using a z generator will give the 27 combinations for 3
--- [ (x,y,z) | x <- [T,F,M], y<- [T,F,M], z<- [T,F,M] ]
--- NEED to recreate this functionality using recursion
--- uses a generator at each rec. level, use list comp, to pair them 
--- adding the string vars to pairs after this should be much simpler
--- [(T,T)] -> [("vT",T),("vF",T)] ...
-{-The function lk that takes a dictionary and a string and returns
-  the value associated with the string in the dictionary.
-
-lk :: Dict -> String -> Ternary
-lk d s = head [t | (k, t) <- d, k==s]
--}
-
---dictList (xs:xss) =  [x | x <- [T,F,M]]  ++dictList xss
-
- 
---dictList varList = 
---tupleGen :: String -> Ternary -> (String, Ternary)
 
 
-testList singleVar = [[(x, y)] | x <- [singleVar], y <- [T, F, M]]
---testList singleVar = [[x] | y <- [T, F, M], x <- [(singleVar, y)]]
---[[("vT",T)],[("vT",F)],[("vT",M)]]
-
-testList2 dictL1 dictL2 = [[x, y] | a <- dictL1, b <- dictL2, x <- a, y <- b]
-
---[[("vT",T),("vF",T)],[("vT",T),("vF",F)],[("vT",T),("vF",M)],[("vT",F),("vF",T)],[("vT",F),("vF",F)],[("vT",F),("vF",M)],[("vT",M),("vF",T)],[("vT",M),("vF",F)],[("vT",M),("vF",M)]]
-
-testList3 [] = []
-testList3 stringList = [x | singleVar <- stringList, x <- [(testList singleVar)]]
+dictList [] = [[]]
+dictList (x:xs) = [((x,y):z) | z <- (dictList xs), y <- [T, F, M]]
 
 
--- 1 var = 3 dicts
---[[("vT", T)], [("vT", F)], [("vT",M)]]
---2 var = 9 dicts
+
 {-
 [[("vT",T),("vF",T)],[("vT",F),("vF",T)],[("vT",M),("vF",T)]
 ,[("vT",T),("vF",F)],[("vT",F),("vF",F)],[("vT",M),("vF",F)]
@@ -531,8 +498,8 @@ to all possible combination of values assigned to the variables (dictionaries)
 -}
 
 
-
-
+--Use MAP function to map evalT of the pased tree to the dictList
+-- create a list of results of this map
 
 
 
@@ -544,7 +511,7 @@ evaluation of the expression returns T regardless of the value assigned to the v
 
 
 
-
+-- check each value in the list of results (see previous function) and at last return "true" if all the values in the list are "T"
 
 
 
@@ -559,10 +526,10 @@ to test your work
 testVarList :: Bool
 testVarList = varList (O (V "vT") (O (N (V "vM")) (E (V "vF") (L M)))) == ["vT", "vM", "vF"]
             && varList (O (L T) (O (N (L F)) (E (L M) (L M)))) == []
-{-
+
 sortedDictList :: Ord a => [[a]] -> [[a]]
 sortedDictList xss = sort [sort d | d <- xss]
-
+{-
 testDictList :: Bool
 testDictList = dictList [] == [[]] 
                 && sortedDictList (dictList ["vT", "vM", "vF"])
