@@ -1,4 +1,4 @@
-﻿import Parser
+﻿ort Parser
 import Data.List
 
 {- 
@@ -454,6 +454,7 @@ TODO: Create a function varList that takes as input a ternary logic expression t
 and returns a list of all the variable names (strings) contained in the tree.
 -}
  
+ 
 varList :: TExpTree -> [String]
 varList t = nub (getList t)
 getList (L x) = []
@@ -463,6 +464,8 @@ getList (A l r) = (getList l) ++ (getList r)
 getList (O l r) = (getList l) ++ (getList r)
 getList (E l r) = (getList l) ++ (getList r)
 getList (I l r) = (getList l) ++ (getList r)
+ 
+ 
  
 {- Next we need to generate a dictionary for all the possible combinations of values
 that can be assigned to the variables.
@@ -475,18 +478,13 @@ one for each of the 3 literal values in ternary logic. For 2 variables there wil
 values of the second variable, and so forth.
 -}
 
---Use list comprehension here, relating variables in the manner described above
+
+
 dictList :: [String] -> [Dict]
 dictList [] = [[]]
 dictList (x:xs) = [((x,y):z) | z <- (dictList xs), y <- [T, F, M]]
 
 
-
-{-
-[[("vT",T),("vF",T)],[("vT",F),("vF",T)],[("vT",M),("vF",T)]
-,[("vT",T),("vF",F)],[("vT",F),("vF",F)],[("vT",M),("vF",F)]
-,[("vT",T),("vF",M)],[("vT",F),("vF",M)],[("vT",M),("vF",M)]]
--}
 
 {- 
 Now we can evaluate a ternary logic expression against all possible 
@@ -496,7 +494,7 @@ returns in a list of the results (ternary logic literals) of evaluating the expr
 to all possible combination of values assigned to the variables (dictionaries)
 -}
 
-allCases :: TExpTree -> [Ternary]
+-- allCases :: TExpTree -> [Ternary]
 
 
 --Use MAP function to map evalT of the pased tree to the dictList
@@ -532,8 +530,8 @@ sortedDictList :: Ord a => [[a]] -> [[a]]
 sortedDictList xss = sort [sort d | d <- xss]
 
 testDictList :: Bool
-testDictList = dictList [] == [[]] 
-                && sortedDictList (dictList ["vT", "vM", "vF"])
+testDictList = dictList [] == [[]]
+              && sortedDictList (dictList ["vT", "vM", "vF"])
               == sortedDictList 
                  [[("vT",T),("vM",T),("vF",T)],[("vT",F),("vM",T),("vF",T)],[("vT",M),("vM",T),("vF",T)]
                  ,[("vT",T),("vM",F),("vF",T)],[("vT",F),("vM",F),("vF",T)],[("vT",M),("vM",F),("vF",T)]
@@ -544,7 +542,6 @@ testDictList = dictList [] == [[]]
                  ,[("vT",T),("vM",T),("vF",M)],[("vT",F),("vM",T),("vF",M)],[("vT",M),("vM",T),("vF",M)]
                  ,[("vT",T),("vM",F),("vF",M)],[("vT",F),("vM",F),("vF",M)],[("vT",M),("vM",F),("vF",M)]
                  ,[("vT",T),("vM",M),("vF",M)],[("vT",F),("vM",M),("vF",M)],[("vT",M),("vM",M),("vF",M)]]
-
 
 {-
 testTautology :: Bool
