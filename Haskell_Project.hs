@@ -475,12 +475,13 @@ values of the second variable, and so forth.
 -}
 
 --Use list comprehension here, relating variables in the manner described above
-dictList :: [String] -> [Dict]
-dictList [] = [[]]
-dictList (xs:xss) = (dictList xss)++[[(x,y) | x <- [xs], y <- [T,F,M] ]]
+-- dictList :: [String] -> [Dict]
+dictList [] = []
+dictList (xs:xss) =  [ a | a<-[(x,y) | x<-[xs], y <- [T,F,M]] ++ dictList xss ]
 
--- 1 var = 3 dicts
---[[("vT", T)], [("vT", F)], [("vT",M)]]
+-- 1 var = 3 dicts)]]
+
+--[[("vT", T)], [("vT", F)], [("vT",M)]
 --2 var = 9 dicts
 {-
 [[("vT",T),("vF",T)],[("vT",F),("vF",T)],[("vT",M),("vF",T)]
