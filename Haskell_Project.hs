@@ -487,11 +487,34 @@ dictList [] = []
 -- uses a generator at each rec. level, use list comp, to pair them 
 -- adding the string vars to pairs after this should be much simpler
 -- [(T,T)] -> [("vT",T),("vF",T)] ...
+{-The function lk that takes a dictionary and a string and returns
+  the value associated with the string in the dictionary.
 
-dictList (xs:xss) =  [x | x <- [T,F,M]]  ++dictList xss
+lk :: Dict -> String -> Ternary
+lk d s = head [t | (k, t) <- d, k==s]
+-}
 
--- 1 var = 3 dicts)]]
---[[("vT", T)], [("vT", F)], [("vT",M)]
+--dictList (xs:xss) =  [x | x <- [T,F,M]]  ++dictList xss
+
+ 
+--dictList varList = 
+--tupleGen :: String -> Ternary -> (String, Ternary)
+
+
+testList singleVar = [[(x, y)] | x <- [singleVar], y <- [T, F, M]]
+--testList singleVar = [[x] | y <- [T, F, M], x <- [(singleVar, y)]]
+--[[("vT",T)],[("vT",F)],[("vT",M)]]
+
+testList2 dictL1 dictL2 = [[x, y] | a <- dictL1, b <- dictL2, x <- a, y <- b]
+
+--[[("vT",T),("vF",T)],[("vT",T),("vF",F)],[("vT",T),("vF",M)],[("vT",F),("vF",T)],[("vT",F),("vF",F)],[("vT",F),("vF",M)],[("vT",M),("vF",T)],[("vT",M),("vF",F)],[("vT",M),("vF",M)]]
+
+testList3 [] = []
+testList3 stringList = [x | singleVar <- stringList, x <- [(testList singleVar)]]
+
+
+-- 1 var = 3 dicts
+--[[("vT", T)], [("vT", F)], [("vT",M)]]
 --2 var = 9 dicts
 {-
 [[("vT",T),("vF",T)],[("vT",F),("vF",T)],[("vT",M),("vF",T)]
