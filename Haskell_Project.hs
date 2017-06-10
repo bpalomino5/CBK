@@ -263,17 +263,16 @@ they parse.
 -}
 
 
---FIRST ATTEMPT AT PARSE RULES
 
 
 tExp :: Parser TExpTree
 tExp = do opd <- tOpd
           (do symbol "<=>"
               exp <- tExp
-              return (E opd exp) -- opd <=> exp
+              return (E opd exp)
            +++ (do symbol "==>"
                    otherExp <- tExp
-                   return (I opd otherExp) -- opd ==> otherExp
+                   return (I opd otherExp)
                 +++ return opd))
 
 
@@ -319,13 +318,6 @@ tVar = do theVar <- identifier
 
 tLit :: Parser TExpTree
 tLit = do literal <- token (letter)
-          -- if (literal == 'T')
-          --    then return (L T)
-          --    else if (literal == 'F')
-          --       then return (L F)
-          --       else if (literal == 'M')
-          --          then return (L M)
-          --          else error ("An invalid literal was encountered") --WORKING NOTE: This is a placeholder, need to find a better way to deal with this --> This won't work!
           if (literal == 'T' || literal == 'F' || literal == 'M')
              then return (L (lk [("T", T), ("F", F), ("M", M)] [literal]))
              else error ("An invalid literal was encountered")
@@ -341,18 +333,9 @@ parseT xs = case parse tExp xs of
                Just (parsed, remainder) -> error (show parsed ++ " and remaining input " ++ remainder)
                Nothing -> error ("Invalid expression")
 
-{-
-Sample input/output for parseT:
-*Main> parseT "(T ||| F) &&& (M ==> F)"
-A (O (L T) (L F)) (I (L M) (L F))
-*Main> parseT "((T ||| F) &&& (M ==> F)) <=> ((T &&& M) ||| (F ||| M))"
-E (A (O (L T) (L F)) (I (L M) (L F))) (O (A (L T) (L M)) (O (L F) (L M)))
-*Main> 
--}
 
 -- This completes part 3. You can use the following functions to test your implementation
 
---commenting out "test" code temporarily so that errors in unfinished code aren't thrown
 
 testtLit :: Bool
 testtLit = lt == (L T) && lf == (L F) && lm == (L M)  
