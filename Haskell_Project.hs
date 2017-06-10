@@ -502,13 +502,11 @@ to all possible combination of values assigned to the variables (dictionaries)
 {-
 allCases : Creates a list of Ternary values which are the results of testing the TExptree
 against all possible dictionaries.
-First forms a dictList from TExpTree input and then uses list comprehension to go through each dictionary
-evaluating the results of that dictionary with the tree. Then wraps all the result in a Ternary list.
+Uses map to apply the evalT function (always using the provided tree) to each dictionary in the list of dictionaries.
+Map returns a list of T, F, or M ternary literal values
 -}
 
 allCases :: TExpTree -> [Ternary]
---allCases t = [x | z <- dictList (varList t) , x <- [(evalT z t)]]
-
 allCases t = map (\x -> evalT x t) (dictList (varList t))
 
 
@@ -522,7 +520,7 @@ evaluation of the expression returns T regardless of the value assigned to the v
 isTautology : Tautology Checker
 Parses a string expression, using parseT to create a TExpTree
 Then runs allCases on that TExpTree to create a Ternary list.
-The all function is ran on this Ternary list to check if all the values in the list are True
+The all function is run on this Ternary list to check if all the values in the list are True
 and returns True if we have a tautology.
 -}
 
