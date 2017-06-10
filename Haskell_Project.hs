@@ -494,8 +494,8 @@ returns in a list of the results (ternary logic literals) of evaluating the expr
 to all possible combination of values assigned to the variables (dictionaries)
 -}
 
--- allCases :: TExpTree -> [Ternary]
-
+allCases :: TExpTree -> [Ternary]
+allCases t = [x | z <- dictList (varList t) , x<- [(evalT z t)]]
 
 --Use MAP function to map evalT of the pased tree to the dictList
 -- create a list of results of this map
@@ -508,7 +508,8 @@ and return True if the expression contained in the string is a tautology. I.e. i
 evaluation of the expression returns T regardless of the value assigned to the variables.
 -}
 
-
+isTautology :: String -> Bool
+isTautology s = all (\x->x==T) (allCases (parseT s))
 
 -- check each value in the list of results (see previous function) and at last return "true" if all the values in the list are "T"
 
@@ -543,7 +544,7 @@ testDictList = dictList [] == [[]]
                  ,[("vT",T),("vM",F),("vF",M)],[("vT",F),("vM",F),("vF",M)],[("vT",M),("vM",F),("vF",M)]
                  ,[("vT",T),("vM",M),("vF",M)],[("vT",F),("vM",M),("vF",M)],[("vT",M),("vM",M),("vF",M)]]
 
-{-
+
 testTautology :: Bool
 testTautology = isTautology "v ||| ~v ||| (v <=> M)"
               && not (isTautology "v ||| ~v ")
@@ -557,4 +558,3 @@ testPart4 = testVarList && testDictList && testTautology
 
 testAll :: Bool
 testAll = testPart1 && testPart2 && testPart3 && testPart4
--}
