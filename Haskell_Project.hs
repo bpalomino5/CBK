@@ -3,6 +3,11 @@ import Data.List
 
 {- 
 CS352 Spring 2017 
+Team members:
+Christopher Kilian
+Brandon Palomino
+Kunal Purohit
+
 This project is due Friday June 9th at MIDNIGHT. There will be no extension!!
 Teams of up to 3 students can work on this project. In this case only 1 file must be 
 submitted for all 3 students; the name of all the students in the team must appear
@@ -263,7 +268,10 @@ they parse.
 -}
 
 
-
+{-
+The following parser is designed to break down a provided string into its properly formatted ternary expression tree.
+The ternary literals and variables are the leaves of the tree, and the various symbols (&&&, |||, etc) are the inner nodes of the tree.
+-}
 
 tExp :: Parser TExpTree
 tExp = do opd <- tOpd
@@ -326,6 +334,11 @@ tLit = do literal <- token (letter)
 
 -- TODO: Implement a function parseT that takes a string as input 
 -- and returns a ternary logic expression tree (TExpTree)
+
+{-
+parseT uses the above defined parser to break down the passed string into its properly parsed TExpTree form. 
+If the string is in an improper form, it will throw an error.
+-}
 
 parseT :: String -> TExpTree
 parseT xs = case parse tExp xs of
@@ -438,7 +451,7 @@ and returns a list of all the variable names (strings) contained in the tree.
 -}
  
 {-
-varList : returns a list of string variabales that occur in the ternary expression tree.
+varList : returns a list of string variables that occur in the ternary expression tree.
 getList breaks down the TExpTree and nub is called on the list of the strings to remove
 the duplicate variables in the list.
 -}
@@ -494,11 +507,9 @@ evaluating the results of that dictionary with the tree. Then wraps all the resu
 -}
 
 allCases :: TExpTree -> [Ternary]
-allCases t = [x | z <- dictList (varList t) , x<- [(evalT z t)]]
+--allCases t = [x | z <- dictList (varList t) , x <- [(evalT z t)]]
 
---Use MAP function to map evalT of the pased tree to the dictList
--- create a list of results of this map
-
+allCases t = map (\x -> evalT x t) (dictList (varList t))
 
 
 {- Finally for the tautology checker.
@@ -518,14 +529,10 @@ and returns True if we have a tautology.
 isTautology :: String -> Bool
 isTautology s = all (\x->x==T) (allCases (parseT s))
 
--- check each value in the list of results (see previous function) and at last return "true" if all the values in the list are "T"
-
 
 {- This completes part 4 and the project. You can use the test functions below 
 to test your work
 -}
-
---commenting out "test" code temporarily so that errors in unfinished code aren't thrown
 
 testVarList :: Bool
 testVarList = varList (O (V "vT") (O (N (V "vM")) (E (V "vF") (L M)))) == ["vT", "vM", "vF"]
