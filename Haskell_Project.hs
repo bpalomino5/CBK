@@ -437,7 +437,12 @@ TODO: Create a function varList that takes as input a ternary logic expression t
 and returns a list of all the variable names (strings) contained in the tree.
 -}
  
- 
+{-
+varList : returns a list of string variabales that occur in the ternary expression tree.
+getList breaks down the TExpTree and nub is called on the list of the strings to remove
+the duplicate variables in the list.
+-}
+
 varList :: TExpTree -> [String]
 varList t = nub (getList t)
 getList (L x) = []
@@ -461,7 +466,11 @@ one for each of the 3 literal values in ternary logic. For 2 variables there wil
 values of the second variable, and so forth.
 -}
 
-
+{-
+dictList : Creates a list of dictionaries by using a list of string variables
+Using list comprehension in a recursive manner to handles any number of variables.
+Creates 3^n dictionaries where n is the number of variables.
+-}
 
 dictList :: [String] -> [Dict]
 dictList [] = [[]]
@@ -475,6 +484,13 @@ combinations of values of its variables.
 TODO: create a function allCases that takes an expression tree (TExpTree) as input and
 returns in a list of the results (ternary logic literals) of evaluating the expression tree 
 to all possible combination of values assigned to the variables (dictionaries)
+-}
+
+{-
+allCases : Creates a list of Ternary values which are the results of testing the TExptree
+against all possible dictionaries.
+First forms a dictList from TExpTree input and then uses list comprehension to go through each dictionary
+evaluating the results of that dictionary with the tree. Then wraps all the result in a Ternary list.
 -}
 
 allCases :: TExpTree -> [Ternary]
@@ -491,13 +507,18 @@ and return True if the expression contained in the string is a tautology. I.e. i
 evaluation of the expression returns T regardless of the value assigned to the variables.
 -}
 
+{-
+isTautology : Tautology Checker
+Parses a string expression, using parseT to create a TExpTree
+Then runs allCases on that TExpTree to create a Ternary list.
+The all function is ran on this Ternary list to check if all the values in the list are True
+and returns True if we have a tautology.
+-}
+
 isTautology :: String -> Bool
 isTautology s = all (\x->x==T) (allCases (parseT s))
 
 -- check each value in the list of results (see previous function) and at last return "true" if all the values in the list are "T"
-
-
-
 
 
 {- This completes part 4 and the project. You can use the test functions below 
